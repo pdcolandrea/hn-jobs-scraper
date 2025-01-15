@@ -4,7 +4,7 @@ from openai import OpenAI
 from pydantic import BaseModel
 from typing import Optional
 
-client = OpenAI(api_key="sk-proj-Dt6FeI1B0aurKP8kTHV4T3BlbkFJXh2Ld8cxMM8Ol4VPtmcx")
+client = OpenAI()
 
 class JobRole(BaseModel):
     title: str
@@ -46,7 +46,7 @@ class HNJobParser:
         i = 0
         for job in self.extracted_jobs:
             i += 1
-            if i > 5:
+            if i > 10:
                 break
             parsed_job = self.parse_content(job.get("job_content_html"))
             roles = parsed_job.get("roles", [])
@@ -62,9 +62,11 @@ class HNJobParser:
                     "website": parsed_job.get("website", ""),
                     "location": parsed_job.get("location", ""),
                     "role": role.get("title", ""),
+                    "programming_languages": parsed_job.get("programming_languages", []),
                     "salary": role.get("salary", 0),
-                    "email": role.get("email"),
+                    "email": email,
                     "apply_link": role.get("apply_link"),
+                    "og_content": parsed_job.get("content", ""),
                 })
 
         print(f'finished parse for {len(results)} jobs')
