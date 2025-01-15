@@ -1,6 +1,12 @@
 from pydantic import BaseModel
 from typing import Optional
 
+class HackerNewsExtractedJob(BaseModel):
+    job_content: str
+    posted_by: str
+    posted_ago: str
+
+# Not being used currently
 class HackerNewsJob(BaseModel):
     name: str
     location: str
@@ -12,6 +18,6 @@ class HackerNewsJob(BaseModel):
     salary: Optional[str]
     apply_link: Optional[str]
 
-
+# Not being used currently
 class HackerNewsJobsResult(BaseModel):
     jobs: list[HackerNewsJob]
