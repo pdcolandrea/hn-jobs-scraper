@@ -3,13 +3,14 @@ import json
 from pydantic import BaseModel
 from typing import Optional
 
-from extract import start_extraction
+from extract import HackerNewsJobExtractor
 from parse import HNJobParser
 
 async def main():
-    extraction_result = await start_extraction()
+    extractor = HackerNewsJobExtractor()
+    extraction_result = await extractor.start()
 
-    parser = HNJobParser(extraction_result)
+    # parser = HNJobParser(extraction_result)
     # parser.start()
 
 

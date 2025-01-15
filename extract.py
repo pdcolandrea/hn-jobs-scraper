@@ -2,57 +2,75 @@ import json
 from crawl4ai import AsyncWebCrawler, CrawlerRunConfig, CacheMode
 from crawl4ai.extraction_strategy import JsonCssExtractionStrategy
 from crawl4ai.async_configs import BrowserConfig
+from bs4 import BeautifulSoup
 
 from schemas import HackerNewsExtractedJob
 
-async def start_extraction() -> list[HackerNewsExtractedJob]:
-    browser_config = BrowserConfig() 
 
-    schema = {
-        "name": "Jobs",
-        "baseSelector": "tr.athing.comtr",
-        "fields": [
-            {
-                "name": "indent",
-                "selector": "td.ind",
-                "type": "html",
-            },
-            {
-                "name": "job_content",
-                "selector": "div.commtext",
-                "type": "html",
-            },
-            {
-                "name": "posted_by",
-                "selector": "a.hnuser",
-                "type": "text",
-            },
-            {
-                "name": "posted_ago",
-                "selector": "span.age",
-                "type": "text",
-            },
-        ],
-    }
+class HackerNewsJobExtractor:
+    def __init__(self):
+        pass
 
-    extraction_strategy = JsonCssExtractionStrategy(schema, verbose=True)
-    run_config = CrawlerRunConfig(
-        cache_mode=CacheMode.BYPASS, extraction_strategy=extraction_strategy
-    )
+    async def start(self) -> list[HackerNewsExtractedJob]:
+        browser_config = BrowserConfig() 
 
-    async with AsyncWebCrawler(config=browser_config) as crawler:
-        result = await crawler.arun(
-            url="https://news.ycombinator.com/item?id=42575537", config=run_config
+        schema = {
+            "name": "Jobs",
+            "baseSelector": "tr.athing.comtr",
+            "fields": [
+                {
+                    "name": "indent",
+                    "selector": "td.ind",
+                    "type": "html",
+                },
+                {
+                    "name": "job_content",
+                    "selector": "div.commtext",
+                    "type": "html",
+                },
+                {
+                    "name": "posted_by",
+                    "selector": "a.hnuser",
+                    "type": "text",
+                },
+                {
+                    "name": "posted_ago",
+                    "selector": "span.age",
+                    "type": "text",
+                },
+            ],
+        }
+
+        extraction_strategy = JsonCssExtractionStrategy(schema, verbose=True)
+        run_config = CrawlerRunConfig(
+            cache_mode=CacheMode.BYPASS, extraction_strategy=extraction_strategy
         )
 
-        if not result.success:
-            print("Crawl failed:", result.error_message)
-            raise Exception(result.error_message)
+        async with AsyncWebCrawler(config=browser_config) as crawler:
+            result = await crawler.arun(
+                url="https://news.ycombinator.com/item?id=42575537", config=run_config
+            )
 
-        data = json.loads(result.extracted_content)
+            if not result.success:
+                print("Crawl failed:", result.error_message)
+                raise Exception(result.error_message)
+
+            data = json.loads(result.extracted_content)
+
+            print(f"Extracted {len(data)} job entries")
+            if (len(data) == 0):
+                return []
+
+            processed_jobs = self.post_process(data)
+
+            print(f"Processed {len(processed_jobs)} job entries")
+            print(json.dumps(processed_jobs[8], indent=2) if processed_jobs else "No data found")
+
+            return processed_jobs
         
-
+    def post_process(self, data: list[HackerNewsExtractedJob]) -> list[HackerNewsExtractedJob]:
         processed_jobs = []
+
         # Post-process to extract titles
         for job in data:
             # Clean up the HTML content first
@@ -70,9 +88,6 @@ async def start_extraction() -> list[HackerNewsExtractedJob]:
             if len(content_parts) > 1:
                 job_description = " ".join(content_parts[1:])
                 job_description = job_description.replace("</p>", "").strip()
-
-            if title == "" or job_description == "":
-                continue
                 
             # Check if this is a comment by looking at the indent
             indent_html = job.get("indent", "")
@@ -80,16 +95,12 @@ async def start_extraction() -> list[HackerNewsExtractedJob]:
                 continue
             
             # Update the job dictionary
-            job["title"] = title
-            job["job_content"] = job_description
+            job["title"] = BeautifulSoup(title, "html.parser").get_text()
+            job["job_content"] = BeautifulSoup(job_description, "html.parser").get_text()
             job["posted_by"] = job.get("posted_by", "").strip()
             job["posted_ago"] = job.get("posted_ago", "").strip()
 
             processed_jobs.append(job)
 
-
-        print(f"Extracted {len(processed_jobs)} job entries")
-        print(json.dumps(processed_jobs[8], indent=2) if data else "No data found")
         return processed_jobs
-
 
