@@ -74,7 +74,8 @@ class HackerNewsJobExtractor:
         # Post-process to extract titles
         for job in data:
             # Clean up the HTML content first
-            job_content = job.get("job_content", "")
+            job_content = job.get("job_content")
+            job['job_content_html'] = job_content
             job_content = job_content.replace("<div class=\"commtext c00\">", "").replace("</div>", "")
             
             # Split content into parts using <p> tags
