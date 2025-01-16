@@ -23,6 +23,8 @@ class JobDeduplicator:
         new_listings = []
         for job in jobs:
             company_name = self._extract_company_name(job)
+
+            # TODO: Improve check to avoid name comparison
             if company_name not in self.existing_companies:
                 new_listings.append(job)
             else:

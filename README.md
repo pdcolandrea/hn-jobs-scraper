@@ -14,7 +14,7 @@ A Python-based tool for crawling and parsing Hacker News "Who is Hiring?" monthl
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/hn-hiring.git
+git clone https://github.com/pdcolandrea/hn-jobs-scraper.git
 cd hn-hiring
 ```
 
@@ -23,6 +23,16 @@ cd hn-hiring
 ```bash
 pip install -r requirements.txt
 ```
+
+3. Set up your OpenAI API key:
+
+Create a `.env` file in the root directory and add your OpenAI API key:
+
+```bash
+OPENAI_API_KEY=your_api_key_here
+```
+
+This API key is required for the AI-powered parsing functionality of job postings. Will be improved later - couldn't find any safe, quick way to extract programmatically.
 
 ## Usage
 
@@ -38,7 +48,7 @@ python main.py
 - `parse.py` - Contains parsing logic for job posts
 - `extract.py` - Handles data extraction from HN threads
 - `schemas.py` - Data models and schemas
-- `firecrawl.py` - Web crawling functionality
+- `files.py` - Handles file operations
 
 ## Contributing
 
