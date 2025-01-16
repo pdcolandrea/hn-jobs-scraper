@@ -1,10 +1,12 @@
 from pydantic import BaseModel
 from typing import Optional
 
+
 class HackerNewsExtractedJob(BaseModel):
     job_content: str
     posted_by: str
     posted_ago: str
+
 
 # Not being used currently
 class HackerNewsJob(BaseModel):
@@ -17,6 +19,7 @@ class HackerNewsJob(BaseModel):
     email: Optional[str]
     salary: Optional[str]
     apply_link: Optional[str]
+
 
 # Not being used currently
 class HackerNewsJobsResult(BaseModel):

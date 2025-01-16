@@ -2,6 +2,7 @@ from firecrawl import FirecrawlApp
 from pydantic import BaseModel
 from typing import Optional
 
+
 class HackerNewsJob(BaseModel):
     name: str
     location: str
@@ -17,14 +18,18 @@ class HackerNewsJob(BaseModel):
 class HackerNewsJobsResult(BaseModel):
     jobs: list[HackerNewsJob]
 
+
 def start_firecrawl():
     app = FirecrawlApp()
-    scraped_content = app.scrape_url("https://news.ycombinator.com/item?id=42575537", {
-    'formats': ['extract'],
-    'extract': {
-            'schema': HackerNewsJobsResult.model_json_schema(),
-        }
-    })
+    scraped_content = app.scrape_url(
+        "https://news.ycombinator.com/item?id=42575537",
+        {
+            "formats": ["extract"],
+            "extract": {
+                "schema": HackerNewsJobsResult.model_json_schema(),
+            },
+        },
+    )
     print(scraped_content)
 
 
